@@ -1,0 +1,73 @@
+using Microsoft.AspNetCore.Mvc;
+using RestSharp;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
+
+// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+
+namespace Palota.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class RestCountriesController : ControllerBase
+    {
+
+        [HttpGet]
+        public string GetAllCountries()
+        {
+            var url = "https://restcountries.com/v3.1/all?fields=name";
+
+            var httpRequest = (HttpWebRequest)WebRequest.Create(url);
+
+            var httpResponse = (HttpWebResponse)httpRequest.GetResponse();
+            using (var streamReader = new StreamReader(httpResponse.GetResponseStream()))
+            {
+                var result = streamReader.ReadToEnd();
+            }
+            return httpResponse.StatusCode.ToString();
+                      
+        }
+        [HttpGet]
+        public async Task<string> GetSingleCountryWithISOcode(string iso)
+        {
+            var client = new RestClient("https://restcountries.com/");
+            var request = new RestRequest("v3.1/alpha/"+iso, Method.Get);
+
+            RestResponse response = await client.ExecuteGetAsync(request);
+
+            var content = response.Content; // {"message":" created."}
+
+            return content.ToString();
+        }
+        [HttpGet]
+        public async Task<string> CountriesBordersByCountriesISoCode(string iso)
+        {
+            var client = new RestClient("https://restcountries.com/");
+            var request = new RestRequest("v2/alpha/" + iso + "?" + "fields" + "=" + "borders", Method.Get);
+
+            RestResponse response = await client.ExecuteGetAsync(request);
+
+            var content = response.Content; // {"message":" created."}
+
+            return content.ToString();
+        }
+        [HttpGet]
+        public async Task<string> CountrieByContinentName(string iso, string region)
+        {
+        
+            var client = new RestClient("https://restcountries.com/");
+            var request = new RestRequest("v3.1/" + region +"/" + iso + "?" + "fields" + "=" + "name", Method.Get);
+
+            RestResponse response = await client.ExecuteGetAsync(request);
+
+            var content = response.Content; // {"message":" created."}
+
+            return content.ToString();
+        }
+    }
+}
